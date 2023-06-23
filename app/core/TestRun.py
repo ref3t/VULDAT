@@ -34,7 +34,7 @@ model.fit(X_train, y_train)
 new_text = "And this is the third one"
 preprocessed_new_text = preprocess_text(new_text)
 new_text_vector = vectorizer.transform([preprocessed_new_text])
-
+# dfdf
 # # Step 7: Calculate cosine similarity between the new document and the corpus
 # cosine_similarities = cosine_similarity(new_text_vector, tfidf_matrix).flatten()
 
