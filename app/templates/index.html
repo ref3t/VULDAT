@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Find All Weakness related to Attack Description</h1>
+<form  method="post">
+    <label for="description">Description:</label><br>
+    <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
+    <input type="submit" name="findDes" value="Submit" class="submit-button">
+</form>
+<script>
+    function showLoader() {
+      document.querySelector('.loader').style.display = 'block';
+    }
+  
+    function hideLoader() {
+      document.querySelector('.loader').style.display = 'none';
+    }
+  </script>
+  
+<p>  </p>
+{% if show_table  %}
+
+<table>
+    <tr>
+        <th>CVE-ID</th>
+        <th>DESCRIPTION</th>
+        <th>CWE-ID</th>
+        <th>CWE-NAME</th>
+        <th>Show All Relevent CWE</th>
+    </tr>
+    <tr>
+        <td>{{ res[0] }}</td>
+        <td>{{ res[1] }}</td>
+        <td>{{ res[2] }}</td>
+        <td>{{ res[3] }}</td> 
+        <td class="last-column"><form  method="post">
+            <input type="hidden" name="hidden-data-1" value="{{ res[2] }}">
+            <input type="submit" name="formfindAllCWE" value="Show CWEs" class="submit-button">
+        </form></td> 
+    </tr>
+    
+</table> 
+{% else %}
+{% if cweID %}
+
+<p>Result: {{ cweID }}</p>
+<table>
+    <thead>
+        <tr>
+            <th>CVE-ID</th>
+            <th>DESCRIPTION</th>
+            <th>CWE-ID</th>
+            <th>CWE-NAME</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for index, row in res.iterrows() %}
+        <tr>
+            {% for column in res.columns %}
+                <td>{{ row[column] }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+         
+    
+</body>
+</table> 
+{% else %}
+<p>Res</p>
+{% endif %}
+{% endif %}
+{% endblock %}
