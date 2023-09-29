@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Find All Vulnerabilities From CyberAttack Text</h1>
+<h1>Find All Weakness related to Attack Description</h1>
 <form  method="post">
-    <label for="description">CyberAttack Text</label><br>
+    <label for="description">Description:</label><br>
     <textarea id="description" name="description" rows="4" cols="50" required></textarea><br><br>
     <input type="submit" name="findDes" value="Find Vulnerability" class="submit-button">
 </form> 
@@ -25,15 +25,8 @@ document.getElementById("description").value = "{{ description }}";
         <th>Show Info</th>
 
     </tr>
-        {% set color = {
-            'CRITICAL': 'red',
-            'HIGH': 'orange',
-            'MEDIUM': 'yellow',
-            'LOW': 'green'
-        } %}
         {% for row in res %}
-        
-        <tr style="background-color: {{ color[row['v2_severity']] }}">
+        <tr>
             <td>{{ row['CVE_ID'] }}</td>
             <td>{{ row['CVE_Des'] }}</td>
             <td>{{ row['CWE_ID'] }}</td>

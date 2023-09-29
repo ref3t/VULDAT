@@ -116,10 +116,10 @@ def mapCapecFilter():
     dataCapec = dataCapec.loc[:, ['ID', 'Name', 'Description', 'Likelihood Of Attack', 'Typical Severity', 'Execution Flow', 'Prerequisites','Skills Required', 'Resources Required', 'Indicators', 'Mitigations', 'Example Instances', 'Related Weaknesses', 'Taxonomy Mappings']]
     newData = splitData(dataCapec, 'Related Weaknesses')
     newData = splitDataATTACKtechniques(newData)
-    newData.to_excel('data.xlsx', index=False)
+    newData.to_excel('CAPECWithCwesData.xlsx', index=False)
     # num_data_points = newData['Related Weaknesses'].nunique() # 337
     # print(num_data_points)
-    dataCapec = pd.read_excel('data.xlsx', sheet_name=0)
+    dataCapec = pd.read_excel('CAPECWithCwesData.xlsx', sheet_name=0)
     print(dataCapec.head(50))
     return
 
@@ -158,16 +158,41 @@ def mapAttackCAPEC():
     trainAndTestSet = test
     print(test.head(10))
     
-    dataCapec = pd.read_excel('app/datasets/Capec_Data_Refat.xlsx', sheet_name=0)
-    dfAttackcapecMerged = pd.merge(trainAndTestSet, dataCapec, left_on='name', right_on='ATTACK_techniques_name')
+    dataCapec = pd.read_excel('CAPECWithCwesData.xlsx', sheet_name=0)
+    dfAttackcapecMerged = pd.merge(trainAndTestSet, dataCapec, left_on='name', right_on='CAPEC-ATTACK_techniques_name')
     print(dfAttackcapecMerged.head(10))
     dfAttackcapecMerged.to_excel('dfAttackcapecMerged.xlsx', index=False)
     return
 
 
 def mapattackcapeccvebycwe():
-    dataattack = pd.read_excel('app/datasets/dfAttackcapecMerged.xlsx', sheet_name=0)
-    datacve = pd.read_excel('app/datasets/Vulnerability_Dataset.xlsx', sheet_name=0)
+    dataattack = pd.read_excel('dfAttackcapecMerged.xlsx', sheet_name=0)
+    datacve = pd.read_excel('FinalCVEsCWEs.xlsx', sheet_name=0)
+    dataattack['CAPEC-Related Weaknesses'] = dataattack['CAPEC-Related Weaknesses'].astype(str).str.rstrip('.0')
+    # dataattack['CAPEC-Related Weaknesses'] = dataattack['CAPEC-Related Weaknesses'].apply(lambda x: 'CWE-' + str(x))
+    datacve['CWE-ID'] = datacve['CWE-ID'].astype(str)
+    dataattack['CAPEC-Related Weaknesses'] = dataattack['CAPEC-Related Weaknesses'].astype(str)
+    dfAttackcapecMerged = pd.merge(datacve, dataattack, left_on='CWE-ID', right_on='CAPEC-Related Weaknesses')
+    # common_values = set(datacve['CWE-ID']).intersection(set(dataattack['CAPEC-Related Weaknesses']))
+    # print(f'Number of common values: {len(common_values)}')
+    dfAttackcapecMerged = dfAttackcapecMerged.sample(n=10000)
+
+    # print(dfAttackcapecMerged.head(10))
+    # dfAttackcapecMerged.to_csv('dfAttackCVEbyCWEMerged.csv.gz', index=False, compression='gzip')
+    dfAttackcapecMerged.head(100000).to_excel('output.xlsx', index=False)
+    dfAttackcapecMerged.to_excel('dfAttackCVEbyCWEMerged.xlsx', index=False)
+  
+def addCveInfoAfterExportCvefromCWE():
+    cvecwe = pd.read_excel('CVEsCWEs.xlsx', sheet_name=0)
+    datacve = pd.read_csv('cvesjust.csv', encoding='latin-1')
+    dfAttackcapecMerged = pd.merge(datacve, cvecwe, left_on='CVE-ID', right_on='CVE-ID')
+
+    dfAttackcapecMerged.to_excel('FinalCVEsCWEs.xlsx', index=False)
+    
+    
+def mapcvebyCAPECUsingCWE():
+    dataattack = pd.read_excel('dfAttackcapecMerged.xlsx', sheet_name=0)
+    datacve = pd.read_excel('FinalCVEsCWEs.xlsx', sheet_name=0)
     dataattack['Related Weaknesses'] = dataattack['Related Weaknesses'].astype(str).str.rstrip('.0')
     dataattack['Related Weaknesses'] = dataattack['Related Weaknesses'].apply(lambda x: 'CWE-' + str(x))
     dfAttackcapecMerged = pd.merge(datacve, dataattack, left_on='CWE-ID', right_on='Related Weaknesses')
@@ -177,12 +202,42 @@ def mapattackcapeccvebycwe():
     # dfAttackcapecMerged.to_csv('dfAttackCVEbyCWEMerged.csv.gz', index=False, compression='gzip')
     dfAttackcapecMerged.head(100000).to_excel('output.xlsx', index=False)
     # dfAttackcapecMerged.to_excel('dfAttackCVEbyCWEMerged.xlsx', index=False)
-    
-    
+
 
 # getAllCweRelated("CWE-191")
 # getDescription("Denial of service to NT mail servers including Ipswitch, Mdaemon, and Exchange through a buffer overflow in the SMTP HELO command.")
 # mapCapecAttack()
 
 # mapAttackCAPEC()
+# mapattackcapeccvebycwe()
+
+
+def exportCvesFromCwes():
+    
+    import csv
+    import re
+    result_df = pd.DataFrame(columns=['CVE-ID','CWE-ID', 'CWE-Name', 'CWE-Weakness Abstraction', 'CWE-Status', 'CWE-Description', 'CWE-Extended Description', 'CWE-Related Weaknesses', 'CWE-Weakness Ordinalities', 'CWE-Applicable Platforms', 'CWE-Background Details', 'CWE-Alternate Terms', 'CWE-Modes Of Introduction', 'CWE-Exploitation Factors', 'CWE-Likelihood of Exploit', 'CWE-Common Consequences', 'CWE-Detection Methods', 'CWE-Potential Mitigations', 'CWE-Observed Examples', 'CWE-Functional Areas', 'CWE-Affected Resources', 'CWE-Taxonomy Mappings', 'CWE-Related Attack Patterns', 'CWE-Notes'])
+
+    with open('Datasets/cwes.csv', 'r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        for row in reader:
+
+            # print(row)
+            pattern = r'(?<=REFERENCE:)(CVE-\d{4}-\d+)(?=:DESCRIPTION:)'
+            matches = re.findall(pattern, row[17])
+
+            # print(matches)
+            for cve in matches:
+                result_df = pd.concat([result_df, pd.DataFrame({'CVE-ID':[cve],'CWE-ID': [row[0]], 'CWE-Name': [row[1]], 'CWE-Weakness Abstraction': [row[2]], 'CWE-Status': [row[3]], 'CWE-Description': [row[4]], 'CWE-Extended Description': [row[5]], 'CWE-Related Weaknesses': [row[6]], 'CWE-Weakness Ordinalities': [row[7]], 'CWE-Applicable Platforms': [row[8]], 'CWE-Background Details': [row[9]], 'CWE-Alternate Terms': [row[10]], 'CWE-Modes Of Introduction': [row[11]], 'CWE-Exploitation Factors': [row[12]], 'CWE-Likelihood of Exploit': [row[13]], 'CWE-Common Consequences': [row[14]], 'CWE-Detection Methods': [row[15]], 'CWE-Potential Mitigations': [row[16]], 'CWE-Observed Examples': [row[17]], 'CWE-Functional Areas': [row[18]], 'CWE-Affected Resources': [row[19]], 'CWE-Taxonomy Mappings': [row[20]], 'CWE-Related Attack Patterns': [row[21]], 'CWE-Notes': [row[22]] })], ignore_index=True)
+    result_df.to_excel('CVEsCWEs.xlsx', index=False)
+
+   
+
+
+
+# exportCvesFromCwes()
+# mapCapecFilter()
+# mapAttackCAPEC()
+# addCveInfoAfterExportCvefromCWE()
+
 mapattackcapeccvebycwe()
