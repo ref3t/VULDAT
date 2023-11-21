@@ -12,12 +12,12 @@ The VULDAT approach uses four datasets from the MITRE repositories, which are:
 
 
 # HOW To Use The Scripts
-Pre-Requirements
--Python3
--sklearn
--gensim
--numpy
--nltk
+-Pre-Requirements
+  -Python3
+  -sklearn
+  -gensim
+  -numpy
+  -nltk
 How to use
 -
 
