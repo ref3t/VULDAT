@@ -20,7 +20,7 @@ Pre-Requirements
   - nltk
     
 How to use
-- First use  to run the server
+- First use  https://github.com/ref3t/VULDAT/blob/master/app/main.py to run the server
 - Insert any Attack Text 
 
 
