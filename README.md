@@ -18,7 +18,9 @@ Pre-Requirements
   - gensim
   - numpy
   - nltk
+    
 How to use
--
+- First use  to run the server
+- Insert any Attack Text 
 
 
