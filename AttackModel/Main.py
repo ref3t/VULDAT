@@ -148,8 +148,8 @@ if __name__ == "__main__":
 
     train_dataloader = model.data_loader_creator.create_training_dataset(df)
     model.train_model(train_dataloader)
-    model.save_model("path/to/model")
+    model.save_model("AttackModel")
 
-    model.load_model("path/to/model")
-    similarity = model.compute_similarity("This is the first sentence.", "This is the second sentence.")
-    print("The cosine similarity between the sentences is:", similarity)
+    model.load_model("AttackModel")
+    similarity = model.compute_similarity("ATTTACK 1", "ATTAACK 2")
+    print("The cosine similarity between the attacks is:", similarity)
