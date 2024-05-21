@@ -4,7 +4,7 @@ from sentence_transformers import SentenceTransformer, losses, InputExample
 from torch.utils.data import DataLoader
 import pandas as pd
 import torch
-
+import re
 class DataLoaderCreator:
     def __init__(self, model_name):
         """
@@ -32,8 +32,17 @@ class DataLoaderCreator:
         for id, group in grouped:
             technique_description = group['TechnqiueDescription'].iloc[0]
             cve_descriptions = group['CVEDescription'].tolist()
+            
 
             for cve_description in cve_descriptions:
+                technique_description2 = self.removeURLandCitationBulk(technique_description)
+                cve_descriptions2 = self.removeURLandCitationBulk(cve_description)
+                
+                print(technique_description)
+                print(technique_description2)
+
+                print(cve_description)
+                print(cve_descriptions2)
                 # Generate embeddings for the descriptions
                 technique_embedding = self.model.encode(technique_description, convert_to_tensor=True)
                 cve_embedding = self.model.encode(cve_description, convert_to_tensor=True)
@@ -74,6 +83,34 @@ class DataLoaderCreator:
         train_dataloader = DataLoader(train_data, shuffle=True, batch_size=16)
 
         return train_dataloader
+
+    def removeURLandCitationBulk(self, text):
+            
+        # Regular expression pattern to match citations
+        citation_pattern = r'\(Citation:.*?\)'
+
+        # Regular expression pattern to match URLs
+        url_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
+
+        # Find all occurrences of citations in the text
+        citations = re.findall(citation_pattern, text)
+
+        # Remove each citation from the text
+        for citation in citations:
+            text = text.replace(citation, '')
+
+        # Find all occurrences of URLs in the text
+        urls = re.findall(url_pattern, text)
+
+        # Remove each URL from the text
+        for url in urls:
+            text = text.replace(url, '')
+        regex = "^<code>.*</code>$"
+        text = re.sub(regex, "",text, flags=re.MULTILINE) 
+        text = " ".join(text.split()) # remove extra spaces
+        text = re.sub("[^A-Za-z0-9]", " ", text) # replace anything that is not alphanumeric with empty string
+        # text = text.replace("\t", " ")
+        return text
 
 class MyModel:
     def __init__(self, model_name):
