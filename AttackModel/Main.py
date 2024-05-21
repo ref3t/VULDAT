@@ -35,14 +35,9 @@ class DataLoaderCreator:
             
 
             for cve_description in cve_descriptions:
-                technique_description2 = self.removeURLandCitationBulk(technique_description)
-                cve_descriptions2 = self.removeURLandCitationBulk(cve_description)
+                technique_description = self.removeURLandCitationBulk(technique_description)
+                cve_description = self.removeURLandCitationBulk(cve_description)
                 
-                print(technique_description)
-                print(technique_description2)
-
-                print(cve_description)
-                print(cve_descriptions2)
                 # Generate embeddings for the descriptions
                 technique_embedding = self.model.encode(technique_description, convert_to_tensor=True)
                 cve_embedding = self.model.encode(cve_description, convert_to_tensor=True)
